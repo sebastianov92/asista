@@ -1,0 +1,15 @@
+# Xcode project se genera con XcodeGen (project.yml es la fuente).
+*.xcodeproj
+dist/
+build/
+**/DerivedData/
+.DS_Store
+
+# Material de firma y certificados: jamás al repo (es público).
+*.p12
+*.pem
+*.cer
+*.p8
+*.key
+*.mobileprovision
+*.keystore

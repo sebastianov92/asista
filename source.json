@@ -1,0 +1,39 @@
+{
+  "name": "Asista",
+  "identifier": "com.sebastian.asista.source",
+  "subtitle": "Reclamos de seguros médicos",
+  "iconURL": "https://raw.githubusercontent.com/sebastianov92/asista/main/docs/icon.png",
+  "website": "https://github.com/sebastianov92/asista",
+  "tintColor": "#2E7ACD",
+  "apps": [
+    {
+      "name": "Asista",
+      "bundleIdentifier": "com.sebastian.Asista",
+      "developerName": "Sebastián Ordóñez",
+      "subtitle": "Reclamos de seguros médicos",
+      "localizedDescription": "Arma y envía reclamos de seguros médicos en minutos: escanea los documentos con la cámara, genera PDFs livianos y bien nombrados, y los envía en un solo correo a los destinatarios correctos. Local-first (todo vive en tu dispositivo). Incluye OCR de facturas y recetas, alarmas de medicación, seguimiento de montos, historial médico y reportes.",
+      "iconURL": "https://raw.githubusercontent.com/sebastianov92/asista/main/docs/icon.png",
+      "tintColor": "#2E7ACD",
+      "category": "utilities",
+      "screenshots": [],
+      "versions": [
+        {
+          "version": "0.1.0",
+          "date": "2026-07-28",
+          "size": 0,
+          "downloadURL": "https://github.com/sebastianov92/asista/releases/download/v0.1.0/Asista.ipa",
+          "localizedDescription": "Primera versión pública",
+          "minOSVersion": "17.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": ["com.apple.security.application-groups"],
+        "privacy": {
+          "NSCameraUsageDescription": "Escanear documentos médicos.",
+          "NSFaceIDUsageDescription": "Proteger tus datos médicos al abrir la app."
+        }
+      }
+    }
+  ],
+  "news": []
+}

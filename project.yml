@@ -1,0 +1,89 @@
+name: Asista
+options:
+  bundleIdPrefix: com.sebastian
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"   # iPhone
+    GENERATE_INFOPLIST_FILE: NO
+
+schemes:
+  Asista:
+    build:
+      targets:
+        Asista: all
+    run:
+      config: Debug
+
+targets:
+  Asista:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    resources:
+      - path: Resources
+    dependencies:
+      - target: AsistaShare
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # Para activar Share Extension (App Group) + iCloud: en Xcode agrega la
+        # capacidad "App Groups" (group.com.sebastian.Asista) e "iCloud/CloudKit"
+        # con tu cuenta de desarrollador, o apunta aquí a Asista.entitlements.
+        # CODE_SIGN_ENTITLEMENTS: Asista.entitlements
+    info:
+      path: Sources/Info.plist
+      properties:
+        CFBundleName: Asista
+        CFBundleDisplayName: Asista
+        CFBundleShortVersionString: "0.1.0"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        # Datos médicos: proteger archivos siempre.
+        NSFileProtectionComplete: true
+        NSCameraUsageDescription: "Asista usa la cámara para escanear tus documentos médicos. Las imágenes se guardan cifradas en tu dispositivo y nunca salen salvo cuando envías un reclamo por correo."
+        NSPhotoLibraryUsageDescription: "Asista puede importar fotos de tus documentos médicos desde tu galería."
+        NSFaceIDUsageDescription: "Asista usa Face ID para proteger tus datos médicos al abrir la app."
+        # BGProcessingTask para reintentar envíos en segundo plano (§8.5).
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.sebastian.Asista.envio.retry
+        UIBackgroundModes:
+          - fetch
+          - processing
+
+  AsistaShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ShareExtension
+      - path: Sources/Shared/AppGroup.swift
+    settings:
+      base:
+        # Activa el App Group con tu cuenta dev y descomenta:
+        # CODE_SIGN_ENTITLEMENTS: ShareExtension/AsistaShare.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.sebastian.Asista.Share
+    info:
+      path: ShareExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Asista
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: AsistaShare.ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsFileWithMaxCount: 20
+              NSExtensionActivationSupportsImageWithMaxCount: 20

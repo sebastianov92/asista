@@ -1,0 +1,66 @@
+name: Release (IPA)
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Seleccionar la Xcode más reciente
+        run: |
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          [ -z "$LATEST" ] && LATEST=/Applications/Xcode.app
+          sudo xcode-select -s "$LATEST"
+          xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Build IPA
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          [[ "$TAG" == v* ]] && export VERSION="${TAG#v}"
+          ./scripts/build-release.sh
+      # El texto del tag anotado es el changelog que va como cuerpo del release.
+      - name: Changelog desde el tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+          BODY="$(git tag -l --format='%(contents:body)' "$TAG")"
+          [ -z "$BODY" ] && BODY="$(git tag -l --format='%(contents)' "$TAG")"
+          [ -z "$BODY" ] && BODY="Actualización $TAG"
+          {
+            echo 'NOTES<<ASISTA_EOF'
+            echo "$BODY"
+            echo ASISTA_EOF
+          } >> "$GITHUB_ENV"
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Asista.ipa
+          body: ${{ env.NOTES }}
+          generate_release_notes: false
+        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload artifact (runs manuales)
+        uses: actions/upload-artifact@v4
+        with:
+          name: asista-ipa
+          path: dist/
+        if: "!startsWith(github.ref, 'refs/tags/')"
+      - name: Actualizar source.json de SideStore
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          SIZE=$(stat -f%z dist/Asista.ipa)
+          TAG="${GITHUB_REF#refs/tags/}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main && git checkout main
+          ./scripts/make-source.sh "$TAG" "$SIZE" "Actualización $TAG"
+          git add source.json
+          git commit -m "chore: source.json → $TAG" || exit 0
+          git push origin main
