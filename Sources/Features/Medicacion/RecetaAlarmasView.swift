@@ -58,6 +58,14 @@ struct RecetaAlarmasView: View {
                         }
                     }
                 }
+
+                Section {
+                    Button {
+                        pautas.append(.enBlanco)
+                    } label: {
+                        Label("Agregar medicamento", systemImage: "plus.circle")
+                    }
+                }
             }
             .navigationTitle("Receta detectada")
             .navigationBarTitleDisplayMode(.inline)
