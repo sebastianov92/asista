@@ -18,11 +18,11 @@
       "screenshots": [],
       "versions": [
         {
-          "version": "0.1.1",
+          "version": "0.1.2",
           "date": "2026-07-28",
-          "size": 1469072,
-          "downloadURL": "https://github.com/sebastianov92/asista/releases/download/v0.1.1/Asista.ipa",
-          "localizedDescription": "Actualización v0.1.1",
+          "size": 1470760,
+          "downloadURL": "https://github.com/sebastianov92/asista/releases/download/v0.1.2/Asista.ipa",
+          "localizedDescription": "Actualización v0.1.2",
           "minOSVersion": "17.0"
         }
       ],
