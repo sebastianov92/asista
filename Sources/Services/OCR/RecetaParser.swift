@@ -25,10 +25,11 @@ struct PautaDetectada: Identifiable {
 
 enum RecetaParser {
 
-    private static let formas = ["tableta", "tabletas", "comprimido", "comprimidos",
-        "cápsula", "capsula", "cápsulas", "capsulas", "pastilla", "pastillas",
-        "gota", "gotas", "ml", "cucharada", "cucharadas", "cucharadita", "sobre",
-        "sobres", "inhalación", "inhalaciones", "aplicación", "unidad", "unidades"]
+    private static let formas = ["tableta", "tabletas", "tab", "tabs", "comprimido",
+        "comprimidos", "comp", "cápsula", "capsula", "cápsulas", "capsulas", "cap",
+        "caps", "pastilla", "pastillas", "gota", "gotas", "ml", "cucharada",
+        "cucharadas", "cucharadita", "sobre", "sobres", "inhalación", "inhalaciones",
+        "aplicación", "unidad", "unidades"]
 
     static func parse(_ texto: String) -> [PautaDetectada] {
         let lineas = texto
@@ -95,13 +96,23 @@ enum RecetaParser {
         return 1
     }
 
-    // "cada 8 horas", "c/8", "3 veces al día", "cada día", "una vez al día".
+    // "cada 8 horas/hrs/hs", "c/8", "3 veces al/por día", "cada día",
+    // "una vez al día", y notación 1-0-1 / 1-1-1 (mañana-tarde-noche).
     private static func frecuencia(_ s: String) -> Int? {
         let t = s.lowercased()
-        if let h = capturaInt(t, patron: "cada\\s*(\\d{1,2})\\s*(h|hora|horas)"), h > 0, h <= 24 { return h }
+        if let h = capturaInt(t, patron: "cada\\s*(\\d{1,2})\\s*h"), h > 0, h <= 24 { return h }
         if let h = capturaInt(t, patron: "c/\\s*(\\d{1,2})"), h > 0, h <= 24 { return h }
-        if let veces = capturaInt(t, patron: "(\\d{1,2})\\s*veces\\s*al\\s*d[ií]a"), veces > 0 {
+        if let veces = capturaInt(t, patron: "(\\d{1,2})\\s*veces\\s*(?:al|por)\\s*(?:el\\s*)?d[ií]a"), veces > 0 {
             return max(1, 24 / veces)
+        }
+        // Notación de posología por horario: 1-0-1 (2 tomas), 1-1-1 (3 tomas).
+        if let re = try? NSRegularExpression(pattern: "\\b([0-9])\\s*[-–/]\\s*([0-9])\\s*[-–/]\\s*([0-9])\\b"),
+           let m = re.firstMatch(in: t, range: NSRange(t.startIndex..., in: t)) {
+            let nums = (1...3).compactMap { i -> Int? in
+                Range(m.range(at: i), in: t).flatMap { Int(t[$0]) }
+            }
+            let activas = nums.filter { $0 > 0 }.count
+            if activas > 0 { return max(1, 24 / activas) }
         }
         if t.range(of: "cada\\s*(el\\s*)?d[ií]a", options: .regularExpression) != nil { return 24 }
         if t.contains("una vez al d") || t.contains("1 vez al d") || t.contains("cada 24") { return 24 }
